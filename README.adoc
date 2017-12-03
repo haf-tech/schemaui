@@ -1,0 +1,20 @@
+= SchemaUI
+:author: Hafid Haddouti
+
+////
+image:https://travis-ci.org/haf-tech/blueprint.svg?branch=master["Build Status", link="https://travis-ci.org/haf-tech/blueprint"] 
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License", link="https://opensource.org/licenses/Apache-2.0"]
+image:https://sonarqube.com/api/badges/gate?key=com.haddouti.pg%3Ablueprint-parent["Sonar Quality Gate", link="https://sonarcloud.io/dashboard?id=com.haddouti.pg%3Ablueprint-parent"]
+////
+
+SchemaUI display how to generate dynamically (REST-)Request objects, using a generated UI which use a JSON Schema as definition.
+The JSON Schema will be automatically generated for the REST interface.
+
+It exist multiple frameworks/libs which provides a JSON Schema to UI generation. I have integrated the following
+
+* angular-schema-form
+* json-editor
+
+Both has similar features. json-editor provides the possibility to convert the Model back to UI; which is with angular-schema-form not possible.
+However angular-schema-form provides much more features, to manipulate directly the UI regarding a schema.
+
