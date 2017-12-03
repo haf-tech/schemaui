@@ -18,3 +18,8 @@ It exist multiple frameworks/libs which provides a JSON Schema to UI generation.
 Both has similar features. json-editor provides the possibility to convert the Model back to UI; which is with angular-schema-form not possible.
 However angular-schema-form provides much more features, to manipulate directly the UI regarding a schema.
 
+Tech stack:
+
+* Spring Boot
+* Jackson for JSON Schema Generation
+* AngularJS, Bootstrap
