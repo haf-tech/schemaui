@@ -1,0 +1,13 @@
+
+*.DS_Store
+
+*.sublime-project
+
+*.sublime-workspace
+
+node_modules/*
+
+*.log
+
+.idea/
+/.bower.json

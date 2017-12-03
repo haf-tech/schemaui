@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bootstrap Schema Form example</title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="lib/bower_components/pickadate/lib/themes/classic.css">
+  <link rel="stylesheet" href="lib/bower_components/pickadate/lib/themes/classic.date.css">
+  <link rel="stylesheet" href="lib/bower_components/bootstrap-vertical-tabs/bootstrap.vertical-tabs.min.css">
+  <link rel="stylesheet" href="lib/bower_components/spectrum/spectrum.css">
+
+  <style type="text/css">
+  .spinner {
+    width: 35px;
+    height: 35px;
+    background-color: #333;
+
+    border-radius: 100%;
+    -webkit-animation: scaleout 1.0s infinite ease-in-out;
+    animation: scaleout 1.0s infinite ease-in-out;
+  }
+
+  @-webkit-keyframes scaleout {
+    0% { -webkit-transform: scale(0.0) }
+    100% {
+      -webkit-transform: scale(1.0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes scaleout {
+    0% {
+      transform: scale(0.0);
+      -webkit-transform: scale(0.0);
+    } 100% {
+      transform: scale(1.0);
+      -webkit-transform: scale(1.0);
+      opacity: 0;
+    }
+  }
+
+  body,html {
+    min-height: 1400px;
+  }
+
+  .alert .form-group {
+    margin-bottom: 0px;
+  }
+
+  .red {
+    border: 1px solid red;
+    background: #fee;
+  }
+
+  .ace_editor { font-size: 20px !important;}
+  .form {  height: 90px;  }
+  .schema {  height: 400px;  }
+  .model {  height: 400px;  }
+
+  .btw { color: #777; font-size: 90%; padding-left: 6px;}
+
+  [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+  }
+
+  .navbar-form > .form-group > .input-group {
+    margin-left: 20px;
+  }
+
+  .btn:active,
+  .btn:focus,
+  .btn.active {
+    background-image: none;
+    outline: 0;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .input-group-btn:last-child>.btn:not(:last-child):not(.dropdown-toggle) {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .minHeight {
+  	min-height: 75px;
+  }
+
+</style>
+</head>
+<body ng-app="myModule" ng-controller="FormController" ng-cloak>
+
+<div class="col-md-12">
+  <h1>Generic Schema Form</h1>
+  <div class="row">
+    <div class="col-sm-5">
+      <h3>Data</h3>
+
+      <div ng-show="ngform.$valid"><em>Form is valid</em></div>
+      <div ng-show="ngform.$invalid"><em>Form is not valid</em></div>
+      <form name="ngform"  sf-model="dto.model" sf-form="dto.form" sf-schema="dto.schema"></form>
+
+    </div>
+    <div class="col-sm-7">
+      <h3>Schema</h3>
+      
+      <div class="row">
+      	<div class="col-sm-4">
+	      <div class="form-group minHeight">
+	      	<label for="availableSchemaId">Select Schema/IF</label>
+	        <select class="form-control" id="availableSchemaId"
+	                ng-model="selectedSchema"
+	                ng-options="obj.name for obj in schemaSelection">
+	        </select>
+	      </div>
+      	</div>
+      	<div class="col-sm-2 minHeight"> <br />&nbsp;
+	      <button class="btn btn-primary btn-sm" ng-click="send()">Send</button>
+      	</div>
+      </div>
+      <uib-accordion close-others="oneAtATime">
+      	<div uib-accordion-group class="panel-default" heading="Form Definition" >
+	      <div ui-ace="{ theme: 'monokai',mode:'json'}"
+           ng-class="{red: !isUIDefValid}" ng-model="uiDefinition" class="form-control form"></div>
+	    </div>
+      	<div uib-accordion-group class="panel-default" heading="Schema Definition" >
+	      <div ui-ace="{ theme: 'monokai',mode:'json'}"
+           ng-class="{red: !isSchemaDefValid}" ng-model="schemaDefinition" class="form-control schema"></div>
+	    </div>
+	    <div uib-accordion-group class="panel-default" heading="Curent Model" is-open="true">
+	      <div ui-ace="{ theme: 'monokai',mode:'json'}"
+           ng-model=modelDefinition class="form-control model"></div>
+	    </div>
+	    <div uib-accordion-group class="panel-default" heading="Response" is-open="responseAvailable">
+	      <div ui-ace="{ theme: 'monokai',mode:'json'}"
+           ng-model=response class="form-control model"></div>
+	    </div>
+      </uib-accordion>
+      
+      
+      <pre ng-cloak style="display: none">{{pretty()}}</pre>
+           
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript" src="lib/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="lib/bower_components/tv4/tv4.js"></script>
+<script type="text/javascript" src="lib/bower_components/ace-builds/src-min-noconflict/ace.js"></script>
+<script type="text/javascript" src="lib/bower_components/angular/angular.min.js"></script>
+<script type="text/javascript" src="lib/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<!-- 
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/ng-clip/0.2.6/ng-clip.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+ -->
+<script type="text/javascript" src="lib/bower_components/angular-ui-bootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+
+<!-- 
+ -->
+<script type="text/javascript" src="lib/bower_components/angular-ui-sortable/sortable.js"></script>
+<script type="text/javascript" src="lib/bower_components/angular-ui-ace/ui-ace.js"></script>
+<script type="text/javascript" src="lib/bower_components/objectpath/lib/ObjectPath.js"></script>
+<script type="text/javascript" src="lib/bower_components/pickadate/lib/picker.js"></script>
+<script type="text/javascript" src="lib/bower_components/pickadate/lib/picker.date.js"></script>
+<!-- 
+<script type="text/javascript" src="lib/bower_components/pickadate/lib/translations/nl_NL.js"></script>
+
+<script type="text/javascript" src="http://cdn.tinymce.com/4/tinymce.min.js"></script>
+<script type="text/javascript" src="lib/bower_components/tx-tinymce/tx-tinymce.js"></script>
+ -->
+
+<script type="text/javascript" src="lib/bower_components/spectrum/spectrum.js"></script>
+<!-- 
+<script type="text/javascript" src="lib/bower_components/spectrum/i18n/jquery.spectrum-sv.js"></script>
+ -->
+<script type="text/javascript" src="lib/bower_components/angular-spectrum-colorpicker/dist/angular-spectrum-colorpicker.min.js"></script>
+
+
+<script type="text/javascript" src="lib/bower_components/angular-schema-form/dist/schema-form.js"></script>
+<script type="text/javascript" src="lib/bower_components/angular-schema-form/dist/bootstrap-decorator.min.js"></script>
+<!-- 
+<script type="text/javascript" src="lib/bower_components/angular-schema-form-bootstrap/bootstrap-decorator.min.js"></script>
+ -->
+<script type="text/javascript" src="lib/bower_components/angular-schema-form-datepicker/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript" src="lib/bower_components/angular-schema-form-colorpicker/bootstrap-colorpicker.min.js"></script>
+<!-- 
+<script type="text/javascript" src="lib/bower_components/angular-schema-form-tinymce/bootstrap-tinymce.js"></script>
+ -->
+
+<script type="text/javascript">
+var app = angular.module('myModule', ['schemaForm', 'ui.ace', 'ui.bootstrap'])
+.controller('FormController', function($scope, $http) {
+	$scope.schemaSelection = [
+	    { name: "StockVehicle", schemaUrl: '/stock/v1/add?json', url: '/stock/v1/add', form: ["*"], schema: undefined },
+	    { name: "SearchVehicle", schemaUrl: '/search/v1/detail?json', url: '/search/v1/detail', form: undefined, schema: undefined },
+	  ];
+	
+	
+	  // schema form model	
+	  $scope.dto = {
+		schema : {},
+		form: [
+		    "*"
+			  ],
+		model: {}
+	  };
+
+	  
+	  $scope.decorator = 'bootstrap-decorator';
+	  
+	  
+	  $scope.uiDefinition = {};
+	  
+	  $scope.schemaDefinition = {};
+	  
+	  $scope.modelDefinition = {};
+	  
+	  $scope.response = {};
+	  $scope.responseAvailable = false;
+	  $scope.selectedSchema = {};
+	  
+	  $scope.isSchemaDefValid     = true;
+	  $scope.isUIDefValid = true;
+
+	  
+	  // ************ Observer *****************
+
+	  $scope.$watch('selectedSchema',function(val,old){
+	    
+		  if(val && val !== old) {
+
+	          $http.get(val.schemaUrl)
+	          .then(
+		          function (response) {		              
+		              val.schema = response.data;
+		              setNewData(val);
+		          }, 
+		          function (response) {
+		              $scope.dto.schema = response.statusText;
+		          }
+	          );			  
+		  }
+	  });
+	  
+	  $scope.$watch('schemaDefinition',function(val,old){
+	    if (val && val !== old) {
+	      try {
+	        $scope.dto.schema = JSON.parse($scope.schemaDefinition);
+	        $scope.isSchemaDefValid = true;
+	      } catch (e){
+	        $scope.isSchemaDefValid = false;
+	      }
+	    }
+	  });
+
+	  $scope.$watch('uiDefinition',function(val,old){
+	    if (val && val !== old) {
+	      try {
+	        $scope.form = JSON.parse($scope.uiDefinition);
+	        $scope.isUIDefValid = true;
+	      } catch (e){
+	        $scope.isUIDefValid = false;
+	      }
+	    }
+	  });
+
+	  // **************** Utilities *****************
+	  var setNewData = function(data) {
+	    $scope.dto.schema = data.schema;
+	    $scope.dto.form   = data.form || ["*"];
+	    $scope.schemaDefinition = JSON.stringify($scope.dto.schema,undefined,2);
+	    $scope.uiDefinition   = JSON.stringify($scope.dto.form,undefined,2);
+	    $scope.dto.model = data.model || {};
+	    $scope.response = JSON.stringify({}, undefined, 2);
+	  };
+	  
+	  $scope.pretty = function(){
+		  
+		  $scope.modelDefinition = JSON.stringify($scope.dto.model, undefined, 2);
+		return typeof $scope.dto.model === 'string' ? $scope.dto.model : JSON.stringify($scope.dto.model, undefined, 2);
+	  };
+	  
+	  $scope.send = function() {
+		
+		  $scope.selectedSchema
+		  var data = $scope.dto.model;
+      
+          var config = {
+              headers : {
+                  'Content-Type': 'application/json'
+              }
+          }
+
+          $http.post($scope.selectedSchema.url, data, config)
+          .then(
+        		  
+	          function (response) {
+	              $scope.response = JSON.stringify(response.data, undefined, 2);
+	              $scope.responseAvailable = true;
+	          }, 
+	          function (response) {
+	              $scope.response = response.statusText;
+	              $scope.responseAvailable = true;
+	          }
+          );
+	  };
+	  
+	  // ************ Data ******************
+	  /*
+	  $scope.availableSchemas = [{name: "StockVehicle", schema: {
+			  "type" : "object",
+			  "id" : "urn:jsonschema:com:haddouti:schemaui:domain:StockVehicleRequest",
+			  "properties" : {
+			    "userId" : {
+			      "type" : "string"
+			    },
+			    "vehicles" : {
+			      "type" : "array",
+			      "items" : {
+			        "type" : "object",
+			        "id" : "urn:jsonschema:com:haddouti:schemaui:domain:Vehicle",
+			        "properties" : {
+			          "id" : {
+			            "type" : "integer"
+			          },
+			          "title" : {
+			            "type" : "string"
+			          },
+			          "vehicleConfig" : {
+			            "type" : "object",
+			            "id" : "urn:jsonschema:com:haddouti:schemaui:domain:VehicleConfiguration",
+			            "properties" : {
+			              "firstRegistrationDate" : {
+			                "type" : "string",
+			                "format" : "date"
+			              },
+			              "mileage" : {
+			                "type" : "number"
+			              },
+			              "year" : {
+			                "type" : "integer"
+			              },
+			              "equipments" : {
+			                "type" : "array",
+			                "items" : {
+			                  "type" : "object",
+			                  "id" : "urn:jsonschema:com:haddouti:schemaui:domain:CodeText",
+			                  "properties" : {
+			                    "code" : {
+			                      "type" : "string"
+			                    },
+			                    "text" : {
+			                      "type" : "string"
+			                    }
+			                  }
+			                }
+			              }
+			            }
+			          },
+			          "vehicleMarketing" : {
+			            "type" : "object",
+			            "id" : "urn:jsonschema:com:haddouti:schemaui:domain:VehicleMarketing",
+			            "properties" : {
+			              "specialCampaign" : {
+			                "type" : "string",
+			                "enum" : [ "Y", "N" ]
+			              },
+			              "campaigns" : {
+			                "type" : "array",
+			                "items" : {
+			                  "type" : "object",
+			                  "id" : "urn:jsonschema:com:haddouti:schemaui:domain:VehicleMarketing:VehicleMarketingCampaign",
+			                  "properties" : {
+			                    "title" : {
+			                      "type" : "string"
+			                    },
+			                    "desc" : {
+			                      "type" : "string"
+			                    },
+			                    "createdAt" : {
+			                      "type" : "string",
+			                      "format" : "date"
+			                    },
+			                    "limitedAt" : {
+			                      "type" : "string",
+			                      "format" : "date"
+			                    }
+			                  }
+			                }
+			              }
+			            }
+			          }
+			        }
+			      }
+			    }
+			  }
+			}
+	  },
+	  {name: "SearchVehicle", schema: {
+		  "type" : "object",
+		  "properties" : {
+		    "id" : {
+		      "type" : "integer"
+		    },
+		    "mileage" : {
+		      "type" : "object",
+		      "properties" : {
+		        "from" : {
+		          "type" : "string"
+		        },
+		        "to" : {
+		          "type" : "string"
+		        }
+		      }
+		    },
+		    "year" : {
+		      "type" : "object",
+		      "properties" : {
+		        "from" : {
+		          "type" : "string"
+		        },
+		        "to" : {
+		          "type" : "string"
+		        }
+		      }
+		    },
+		    "equipments" : {
+		      "type" : "array",
+		      "items" : {
+		        "type" : "string"
+		      }
+		    },
+		    "specialCampaign" : {
+		      "type" : "string",
+		      "enum" : [ "Y", "N" ]
+		    }
+		  }
+		}
+	  }];
+
+*/
+	  // ******* Init *************
+	  
+		// selected parameters
+		//$scope.selectedSchema = $scope.schemaSelection[0];		  
+	    //$scope.schema = $scope.availableSchemas[0].schema;
+	  
+		// Init
+	  	setNewData($scope);
+	  
+	  
+	});
+</script>
+</body>
+</html>

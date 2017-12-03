@@ -1,0 +1,15 @@
+# Spring Boot configuration
+
+# Identity
+spring:
+   application:
+     name: schemaui
+     
+# Listen
+server:
+    port: 8099
+    
+# Deactivate security, e.g. for Actuator
+management:
+   security:
+      enabled: false 
